@@ -1,0 +1,42 @@
+{
+  "name": "literate-octo-guacamole",
+  "version": "1.0.0",
+  "description": "nothing to see here",
+  "main": "build/index.js",
+  "peerDependencies": {
+    "react": "^15.5.4"
+  },
+  "dependencies": {
+    "babel-autobind": "^0.3.4",
+    "react": "^15.5.4",
+    "webpack": "^2.6.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/.bin/webpack --watch",
+    "build": "./node_modules/.bin/webpack",
+    "flow:check": "./node_modules/.bin/flow"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.5.1",
+    "babel-preset-flow": "^6.23.0",
+    "flow": "^0.2.3",
+    "flow-bin": "^0.61.0",
+    "webpack": "^2.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pholey/literate-octo-guacamole.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Pholey/literate-octo-guacamole/issues"
+  },
+  "homepage": "https://github.com/Pholey/literate-octo-guacamole#readme"
+}
