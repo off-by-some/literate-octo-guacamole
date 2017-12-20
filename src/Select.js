@@ -1,7 +1,8 @@
 /* @flow */
 import * as React from "react";
-import { setTimeout } from "core-js/library/web/timers";
+import * as Option from './Option';
 
+import autobind from 'autobind-decorator';
 
 type Props = {
   autofocus?: boolean,
@@ -21,7 +22,6 @@ type State = {
 }
 
 export default class Select extends React.Component<Props, State> {
-
   constructor() {
     super();
 
@@ -32,9 +32,12 @@ export default class Select extends React.Component<Props, State> {
 
     (this:any).handleFocusForInput = this.handleFocusForInput.bind(this);
     (this:any).handleBlurForInput = this.handleBlurForInput.bind(this);
+    (this:any).handleClickForClear = this.handleClickForClear.bind(this);
   }
 
   handleFocusForInput(): void {
+    (this:any).dropdown.focus();
+
     this.setState({ focused: true });      
   }
 
@@ -42,19 +45,34 @@ export default class Select extends React.Component<Props, State> {
     this.setState({ focused: false });      
   }
 
-  handleClickForOption(value: string): void {
-    this.setState({ inputValue: value });
-    this.props.onChange(value);
+  handleClickForOption(props: Option.Props): void {
+    const children: any = (props.children || '');
+    let text: string;
+    if (children.toString) {
+      text = children.toString();
+    } else {
+      text = '';
+    }
+
+    // const children: ?string = (props.children || '').toString();
+    this.setState({ inputValue: children });
+    this.props.onChange(props.value);
+  }
+
+  handleClickForClear(): void {
+    this.setState({ inputValue: '' });
   }
 
   attachOnClicks(children?: React.Node = []) {
     return React.Children.map(children, (child) => {
 
-      const value   = child.props.value;
       const onClick = child.props.onClick? child.props.onClick : () => null;
       const wrapperClick = (...e) => {
         e[0].persist(); 
-        this.handleClickForOption(value);
+
+        this.handleClickForOption(child.props);
+        this.handleBlurForInput();
+
         onClick(...e);
       }
 
@@ -71,21 +89,30 @@ export default class Select extends React.Component<Props, State> {
           <select>
             { this.props.children }
           </select>
-          <div className="content">
-            <input 
-                type="text" 
-                placeholder="Select..."
-                onBlur={this.handleBlurForInput}
-                onFocus={this.handleFocusForInput}
-                value={this.state.inputValue}
-              />
+          <div className="content" >
+            <div className="editable">
+              <div className="options">
+                <i onClick={this.handleClickForClear}>x</i>
+              </div>
+              <input 
+                  type="text" 
+                  placeholder="Select..."
+                  onFocus={this.handleFocusForInput}
+                  value={this.state.inputValue}
+                />
+            </div>
 
-            <div className={"drop-down" + ddCn }>
+
+            <div 
+              className={"drop-down" + ddCn } 
+              onBlur={this.handleBlurForInput}
+              tabIndex="-1"
+              ref={ (x) => (this:any).dropdown = x }
+            >
               { children }
             </div>
           </div>
         </div>
       );
-
   }
 }
