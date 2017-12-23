@@ -2,7 +2,8 @@
 import * as React from "react";
 import * as Option from './Option';
 
-import autobind from 'autobind-decorator';
+import a from 'babel-autobind';
+const { Autobind } = a; // Not sure why i need to do this 🙁
 
 type Props = {
   autofocus?: boolean,
@@ -21,22 +22,20 @@ type State = {
   inputValue: string  
 }
 
+@Autobind
 export default class Select extends React.Component<Props, State> {
+  dropDown: ?HTMLDivElement;
+
   constructor() {
     super();
-
     this.state = {
       focused: false,
       inputValue: '',
-    };
-
-    (this:any).handleFocusForInput = this.handleFocusForInput.bind(this);
-    (this:any).handleBlurForInput = this.handleBlurForInput.bind(this);
-    (this:any).handleClickForClear = this.handleClickForClear.bind(this);
+    }
   }
 
   handleFocusForInput(): void {
-    (this:any).dropdown.focus();
+    this.dropdown.focus();
 
     this.setState({ focused: true });      
   }
@@ -107,7 +106,7 @@ export default class Select extends React.Component<Props, State> {
               className={"drop-down" + ddCn } 
               onBlur={this.handleBlurForInput}
               tabIndex="-1"
-              ref={ (x) => (this:any).dropdown = x }
+              ref={ (x) => this.dropdown = x }
             >
               { children }
             </div>
