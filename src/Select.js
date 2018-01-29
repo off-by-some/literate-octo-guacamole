@@ -19,7 +19,7 @@ type Props = {
 
 type State = {
   focused: boolean,
-  inputValue: string  
+  selectedValue: string  
 }
 
 @Autobind
@@ -30,13 +30,15 @@ export default class Select extends React.Component<Props, State> {
     super();
     this.state = {
       focused: false,
-      inputValue: '',
+      selectedValue: '',
     }
   }
 
-  handleFocusForInput(): void {
-    this.dropdown.focus();
+  focus() {
+    this.setState({ focused: true });          
+  }
 
+  handleFocusForInput(): void {
     this.setState({ focused: true });      
   }
 
@@ -54,12 +56,12 @@ export default class Select extends React.Component<Props, State> {
     }
 
     // const children: ?string = (props.children || '').toString();
-    this.setState({ inputValue: children });
+    this.setState({ selectedValue: children });
     this.props.onChange(props.value);
   }
 
   handleClickForClear(): void {
-    this.setState({ inputValue: '' });
+    this.setState({ selectedValue: '' });
   }
 
   attachOnClicks(children?: React.Node = []) {
@@ -97,7 +99,7 @@ export default class Select extends React.Component<Props, State> {
                   type="text" 
                   placeholder="Select..."
                   onFocus={this.handleFocusForInput}
-                  value={this.state.inputValue}
+                  value={this.state.selectedValue}
                 />
             </div>
 
