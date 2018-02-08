@@ -2,10 +2,10 @@
 import * as React from "react";
 import * as Option from './Option';
 import OptionComponent from './Option';
-import Controls from './Controls'
+import ControlsComponent from './Controls'
 import Clear from './Clear';
 import NodeService from '../lib/node';
-import * as NodeServiceTypes from '../lib/node';
+import * as ComponentTypes from '../lib/node';
 
 
 import a from 'babel-autobind';
@@ -29,14 +29,14 @@ type State = {
   selectedValue: string  
 }
 
-// type nodeTypeMap = { 
+// type Bucket = { 
 //   [x: string]: React.Node[],
 // };
 
 @Autobind
 export default class Select extends React.Component<Props, State> {
   dropDown: ?HTMLDivElement;
-  discovered: NodeServiceTypes.nodeTypeMap;
+  discovered: ComponentTypes.Bucket;
 
   constructor(props) {
     super();
@@ -49,9 +49,9 @@ export default class Select extends React.Component<Props, State> {
   }
 
   constructDiscovered(props) {
-    const nodeTypeMap = {};
+    const nodeTypeMap: ComponentTypes.Bucket = {};
     nodeTypeMap[OptionComponent] = [];
-    nodeTypeMap[Controls] = [];
+    nodeTypeMap[ControlsComponent] = [];
 
     this.discovered = NodeService.discoverChildren(props.children, nodeTypeMap);
   }
@@ -91,16 +91,6 @@ export default class Select extends React.Component<Props, State> {
     this.props.onChange('');
   }
 
-  defaultControls() {
-    return (
-      <Controls>
-        <Clear>
-         <i onClick={this.handleClickForClear}>x</i>
-        </Clear>
-      </Controls>
-    );
-  }
-
   attachOnClicks(children?: React.Node = []) {
     return NodeService.attachOnClicks(children, (child, ...e) => {
       this.handleClickForOption(child.props);
@@ -108,10 +98,28 @@ export default class Select extends React.Component<Props, State> {
     });
   }
 
+  getControls() {
+    // If the user has specified a Controls component, return that one instead.
+    // TODO: Merging children?
+    if (this.discovered[ControlsComponent][0]) return this.discovered[ControlsComponent][0];
+
+    return (
+      <ControlsComponent>
+        <Clear>
+         <i onClick={this.handleClickForClear}>x</i>
+        </Clear>
+      </ControlsComponent>
+    );
+  }
+  
+  getOptions() {
+    return this.attachOnClicks(this.discovered[OptionComponent]);
+  }
+
   render() {
       const ddCn     = this.state.focused ? " focused " : "";
-      const options = this.attachOnClicks(this.discovered[OptionComponent]);
-      const controls = this.discovered[Controls][0] || this.defaultControls();
+      const options  = this.getOptions();
+      const ControlsComponent = this.getControls();
 
       return (
         <div className="select">
@@ -120,7 +128,7 @@ export default class Select extends React.Component<Props, State> {
           </select>
           <div className="content" >
             <div className="editable">
-              { controls }
+              { ControlsComponent }
               <input 
                   type="text" 
                   placeholder="Select..."
@@ -143,3 +151,28 @@ export default class Select extends React.Component<Props, State> {
       );
   }
 }
+
+`
+// Most verbose form, every option overridden
+<Select>
+  <Input />
+  <ControlsComponent>
+    <Clear>When you click me i clear the select</Clear> 
+    <div>Sum other stuff here that can react to state</div>
+    <DropdownControl>When you click me i trigger the dropdown</DropdownControl>
+  </ControlsComponent>
+
+  { this.state.options.map(x => (
+    <Option value={x} />
+  ))}
+</Select>
+
+
+Select.propTypes {
+  autoFocus: bool,
+  onSearch: func // Triggered when the Input component changes
+  onChange: func, // Triggered when an option is selected
+  value: obj
+}
+
+`

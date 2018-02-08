@@ -1,5 +1,7 @@
 import React from 'react';
 import Clear from './Clear';
+import DropdownControl from './DropdownControl';
+
 import NodeService from '../lib/node';
 
 export default class Controls extends React.Component {
