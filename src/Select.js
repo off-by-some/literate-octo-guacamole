@@ -104,11 +104,7 @@ export default class Select extends React.Component<Props, State> {
     if (this.discovered[ControlsComponent][0]) return this.discovered[ControlsComponent][0];
 
     return (
-      <ControlsComponent>
-        <Clear>
-         <i onClick={this.handleClickForClear}>x</i>
-        </Clear>
-      </ControlsComponent>
+      <ControlsComponent />
     );
   }
   
