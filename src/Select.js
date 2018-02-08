@@ -1,9 +1,16 @@
 /* @flow */
 import * as React from "react";
 import * as Option from './Option';
+import OptionComponent from './Option';
+import Controls from './Controls'
+import Clear from './Clear';
+import NodeService from '../lib/node';
+import * as NodeServiceTypes from '../lib/node';
+
 
 import a from 'babel-autobind';
 const { Autobind } = a; // Not sure why i need to do this 🙁
+
 
 type Props = {
   autofocus?: boolean,
@@ -22,16 +29,35 @@ type State = {
   selectedValue: string  
 }
 
+// type nodeTypeMap = { 
+//   [x: string]: React.Node[],
+// };
+
 @Autobind
 export default class Select extends React.Component<Props, State> {
   dropDown: ?HTMLDivElement;
+  discovered: NodeServiceTypes.nodeTypeMap;
 
-  constructor() {
+  constructor(props) {
     super();
     this.state = {
       focused: false,
       selectedValue: '',
     }
+
+    this.constructDiscovered(props);
+  }
+
+  constructDiscovered(props) {
+    const nodeTypeMap = {};
+    nodeTypeMap[OptionComponent] = [];
+    nodeTypeMap[Controls] = [];
+
+    this.discovered = NodeService.discoverChildren(props.children, nodeTypeMap);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.constructDiscovered(nextProps);
   }
 
   focus() {
@@ -62,39 +88,39 @@ export default class Select extends React.Component<Props, State> {
 
   handleClickForClear(): void {
     this.setState({ selectedValue: '' });
+    this.props.onChange('');
+  }
+
+  defaultControls() {
+    return (
+      <Controls>
+        <Clear>
+         <i onClick={this.handleClickForClear}>x</i>
+        </Clear>
+      </Controls>
+    );
   }
 
   attachOnClicks(children?: React.Node = []) {
-    return React.Children.map(children, (child) => {
-
-      const onClick = child.props.onClick? child.props.onClick : () => null;
-      const wrapperClick = (...e) => {
-        e[0].persist(); 
-
-        this.handleClickForOption(child.props);
-        this.handleBlurForInput();
-
-        onClick(...e);
-      }
-
-      return React.cloneElement(child, { onClick: wrapperClick });
+    return NodeService.attachOnClicks(children, (child, ...e) => {
+      this.handleClickForOption(child.props);
+      this.handleBlurForInput();
     });
   }
 
   render() {
       const ddCn     = this.state.focused ? " focused " : "";
-      const children = this.attachOnClicks(this.props.children);
+      const options = this.attachOnClicks(this.discovered[OptionComponent]);
+      const controls = this.discovered[Controls][0] || this.defaultControls();
 
       return (
         <div className="select">
           <select>
-            { this.props.children }
+            { options }
           </select>
           <div className="content" >
             <div className="editable">
-              <div className="options">
-                <i onClick={this.handleClickForClear}>x</i>
-              </div>
+              { controls }
               <input 
                   type="text" 
                   placeholder="Select..."
@@ -110,7 +136,7 @@ export default class Select extends React.Component<Props, State> {
               tabIndex="-1"
               ref={ (x) => this.dropdown = x }
             >
-              { children }
+              { options }
             </div>
           </div>
         </div>
