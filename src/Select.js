@@ -29,10 +29,6 @@ type State = {
   selectedValue: string  
 }
 
-// type Bucket = { 
-//   [x: string]: React.Node[],
-// };
-
 @Autobind
 export default class Select extends React.Component<Props, State> {
   dropDown: ?HTMLDivElement;
@@ -98,14 +94,26 @@ export default class Select extends React.Component<Props, State> {
     });
   }
 
-  getControls() {
+  getControls(): React.Node {
     // If the user has specified a Controls component, return that one instead.
-    // TODO: Merging children?
-    if (this.discovered[ControlsComponent][0]) return this.discovered[ControlsComponent][0];
+    const overriden = this.discovered[ControlsComponent][0];
 
-    return (
-      <ControlsComponent />
+    if (overriden == null) return (
+      <ControlsComponent 
+        onClickClear={this.handleClickForClear} 
+        onClickDropdownControl={this.focus} 
+      />
     );
+    
+    const attached = NodeService.attachOnClicks(overriden, (child, ...e) => {
+      this.handleClickForClear();
+    }, 'onClickClear');
+
+    const attached2 = NodeService.attachOnClicks(attached, (child, ...e) => {
+      this.focus();
+    }, 'onClickDropdownControl');
+
+    return attached2;
   }
   
   getOptions() {
@@ -125,6 +133,7 @@ export default class Select extends React.Component<Props, State> {
           <div className="content" >
             <div className="editable">
               { ControlsComponent }
+
               <input 
                   type="text" 
                   placeholder="Select..."
@@ -147,28 +156,3 @@ export default class Select extends React.Component<Props, State> {
       );
   }
 }
-
-`
-// Most verbose form, every option overridden
-<Select>
-  <Input />
-  <ControlsComponent>
-    <Clear>When you click me i clear the select</Clear> 
-    <div>Sum other stuff here that can react to state</div>
-    <DropdownControl>When you click me i trigger the dropdown</DropdownControl>
-  </ControlsComponent>
-
-  { this.state.options.map(x => (
-    <Option value={x} />
-  ))}
-</Select>
-
-
-Select.propTypes {
-  autoFocus: bool,
-  onSearch: func // Triggered when the Input component changes
-  onChange: func, // Triggered when an option is selected
-  value: obj
-}
-
-`

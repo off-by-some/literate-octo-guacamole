@@ -1,5 +1,7 @@
+// @flow
 
-import React from 'react';
+import * as React from 'react';
+import PropTypes from 'prop-types';
 import Clear from './Clear';
 import DropdownControl from './DropdownControl';
 
@@ -7,14 +9,27 @@ import ComponentService from '../lib/node';
 import * as ComponentServiceTypes from '../lib/node';
 
 
-export default class Controls extends React.Component {
-  constructor(props) {
+type Props = {
+  onClickClear: Function,
+  onClickDropdownControl: Function,
+  children?: React.Node,
+}
+
+type State = {
+  focused: boolean,
+  selectedValue: string  
+}
+
+export default class Controls extends React.Component<Props, State> {
+  discovered: ComponentServiceTypes.Bucket;
+
+  constructor(props: Props) {
     super();
 
     this.constructDiscovered(props);
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: Props) {
     this.constructDiscovered(nextProps);
   }
 
@@ -28,7 +43,7 @@ export default class Controls extends React.Component {
 
   defaultClear() {
     return (
-      <Clear>
+      <Clear onClick={this.handleClickForClear}>
         x
       </Clear>
     );
@@ -36,7 +51,7 @@ export default class Controls extends React.Component {
 
   defaultDropdownControl() {
     return (
-      <DropdownControl>
+      <DropdownControl onClick={this.handleClickForDropdownControl}>
         v
       </DropdownControl> 
     );
